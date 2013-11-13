@@ -38,6 +38,8 @@
             this.SegmentsTextBox = new ZoneFiveSoftware.Common.Visuals.TextBox();
             this.TrackComboBox = new System.Windows.Forms.ComboBox();
             this.TrackLabel = new System.Windows.Forms.Label();
+            this.FilterWidthTextBox = new ZoneFiveSoftware.Common.Visuals.TextBox();
+            this.FilterWidthLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -154,7 +156,7 @@
             "Speed",
             "Altitude",
             "Heart rate"});
-            this.TrackComboBox.Location = new System.Drawing.Point(22, 146);
+            this.TrackComboBox.Location = new System.Drawing.Point(22, 183);
             this.TrackComboBox.Name = "TrackComboBox";
             this.TrackComboBox.Size = new System.Drawing.Size(121, 21);
             this.TrackComboBox.TabIndex = 10;
@@ -163,16 +165,47 @@
             // TrackLabel
             // 
             this.TrackLabel.AutoSize = true;
-            this.TrackLabel.Location = new System.Drawing.Point(149, 154);
+            this.TrackLabel.Location = new System.Drawing.Point(149, 191);
             this.TrackLabel.Name = "TrackLabel";
             this.TrackLabel.Size = new System.Drawing.Size(272, 13);
             this.TrackLabel.TabIndex = 11;
             this.TrackLabel.Text = "Choose the data track to use as a base for the colouring";
             // 
+            // FilterWidthTextBox
+            // 
+            this.FilterWidthTextBox.AcceptsReturn = false;
+            this.FilterWidthTextBox.AcceptsTab = false;
+            this.FilterWidthTextBox.BackColor = System.Drawing.Color.White;
+            this.FilterWidthTextBox.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(123)))), ((int)(((byte)(114)))), ((int)(((byte)(108)))));
+            this.FilterWidthTextBox.ButtonImage = null;
+            this.FilterWidthTextBox.Location = new System.Drawing.Point(22, 146);
+            this.FilterWidthTextBox.MaxLength = 32767;
+            this.FilterWidthTextBox.Multiline = false;
+            this.FilterWidthTextBox.Name = "FilterWidthTextBox";
+            this.FilterWidthTextBox.ReadOnly = false;
+            this.FilterWidthTextBox.ReadOnlyColor = System.Drawing.SystemColors.Control;
+            this.FilterWidthTextBox.ReadOnlyTextColor = System.Drawing.SystemColors.ControlLight;
+            this.FilterWidthTextBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.FilterWidthTextBox.Size = new System.Drawing.Size(36, 19);
+            this.FilterWidthTextBox.TabIndex = 12;
+            this.FilterWidthTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.FilterWidthTextBox.Validated += new System.EventHandler(this.FilterWidthTextBox_Validated);
+            // 
+            // FilterWidthLabel
+            // 
+            this.FilterWidthLabel.AutoSize = true;
+            this.FilterWidthLabel.Location = new System.Drawing.Point(76, 152);
+            this.FilterWidthLabel.Name = "FilterWidthLabel";
+            this.FilterWidthLabel.Size = new System.Drawing.Size(111, 13);
+            this.FilterWidthLabel.TabIndex = 13;
+            this.FilterWidthLabel.Text = "Filter width (segments)";
+            // 
             // SettingsPageControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.FilterWidthLabel);
+            this.Controls.Add(this.FilterWidthTextBox);
             this.Controls.Add(this.TrackLabel);
             this.Controls.Add(this.TrackComboBox);
             this.Controls.Add(this.SegmentsTextBox);
@@ -184,7 +217,7 @@
             this.Controls.Add(this.ActivateCheckBox);
             this.Controls.Add(this.label1);
             this.Name = "SettingsPageControl";
-            this.Size = new System.Drawing.Size(436, 185);
+            this.Size = new System.Drawing.Size(436, 216);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -202,5 +235,7 @@
         private ZoneFiveSoftware.Common.Visuals.TextBox SegmentsTextBox;
         private System.Windows.Forms.ComboBox TrackComboBox;
         private System.Windows.Forms.Label TrackLabel;
+        private ZoneFiveSoftware.Common.Visuals.TextBox FilterWidthTextBox;
+        private System.Windows.Forms.Label FilterWidthLabel;
     }
 }
