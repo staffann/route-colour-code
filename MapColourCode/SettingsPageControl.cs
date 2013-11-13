@@ -17,6 +17,7 @@ namespace RouteColourCode
             MinSegmentTextBox.Text = MinSegmentLength.ToString();
             SegmentsTextBox.Text = SegmentsCount.ToString();
             MinSpeedTextBox.Text = MinSpeed.ToString();
+            FilterWidthTextBox.Text = FilterWidth.ToString();
             ActivateCheckBox.Checked = colouringActivated;
             TrackComboBox.Text = TrackChoice;
         }
@@ -49,6 +50,16 @@ namespace RouteColourCode
                 minSpeed = Math.Max(ms, 0);
             }
             MinSpeedTextBox.Text = MinSpeed.ToString();
+        }
+
+        private void FilterWidthTextBox_Validated(object sender, EventArgs e)
+        {
+            int width;
+            if (int.TryParse(FilterWidthTextBox.Text, out width))
+            {
+                filterWidth = Math.Max(width, 1);
+            }
+            FilterWidthTextBox.Text = FilterWidth.ToString();
         }
 
         private void ActivateCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -95,6 +106,12 @@ namespace RouteColourCode
             get { return trackChoice; }
         }
 
+        private static int filterWidth = 20;
+        public static int FilterWidth
+        {
+            get { return filterWidth; }
+        }
+
         public static void SaveSettings(System.Xml.XmlDocument xmlDoc, System.Xml.XmlElement pluginNode)
         {
             XmlElement element = xmlDoc.CreateElement("Activated");
@@ -114,6 +131,11 @@ namespace RouteColourCode
 
             element = xmlDoc.CreateElement("MinSpeed");
             text = xmlDoc.CreateTextNode(MinSpeed.ToString());
+            element.AppendChild(text);
+            pluginNode.AppendChild(element);
+
+            element = xmlDoc.CreateElement("FilterWidth");
+            text = xmlDoc.CreateTextNode(FilterWidth.ToString());
             element.AppendChild(text);
             pluginNode.AppendChild(element);
 
@@ -143,6 +165,9 @@ namespace RouteColourCode
                         break;
                     case "TrackChoice":
                         trackChoice = node.ChildNodes[0].Value;
+                        break;
+                    case "FilterWidth":
+                        int.TryParse(node.ChildNodes[0].Value, out filterWidth); // Ignore return code - can't do anything about it anyway if we can't read
                         break;
                 }
 

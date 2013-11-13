@@ -129,60 +129,77 @@ namespace RouteColourCode
 
                     // Find each segments speed as well as the max and min segment speed
                     List<double> resultList = new List<double>();
-                    float minResult = 0, maxResult = 0;
+                    float unusedMinResult = 0, unusedMaxResult = 0;
                     float segmentDistance = distanceMetersTrack.Max / SettingsPageControl.SegmentsCount;
                     segmentDistance = Math.Max(segmentDistance, SettingsPageControl.MinSegmentLength);
 
                     if (SettingsPageControl.TrackChoice.CompareTo("Speed") == 0)
                     {
-                        CreateSpeedSegments(resultList, distanceMetersTrack, segmentDistance, out minResult, out maxResult);
+                        CreateSpeedSegments(resultList, distanceMetersTrack, segmentDistance, out unusedMinResult, out unusedMaxResult);
                     }
                     else if (SettingsPageControl.TrackChoice.CompareTo("Altitude") == 0)
                     {
                         if (actInfo.HasElevationTrackData)
                         {
-                            CreateMeanValueSegments(resultList, distanceMetersTrack, actInfo.SmoothedElevationTrack, segmentDistance, out minResult, out maxResult);
+                            CreateMeanValueSegments(resultList, distanceMetersTrack, actInfo.SmoothedElevationTrack, segmentDistance, out unusedMinResult, out unusedMaxResult);
                         }
                     }
                     else if (SettingsPageControl.TrackChoice.CompareTo("Heart rate") == 0)
                     {
                         if (actInfo.SmoothedHeartRateTrack != null)
                         {
-                            CreateMeanValueSegments(resultList, distanceMetersTrack, actInfo.SmoothedHeartRateTrack, segmentDistance, out minResult, out maxResult);
+                            CreateMeanValueSegments(resultList, distanceMetersTrack, actInfo.SmoothedHeartRateTrack, segmentDistance, out unusedMinResult, out unusedMaxResult);
                         }
                     }
-                                        
+
+                    // Filter the values in the resultList using a FIR filter
+                    // Filter from both ends in order to avoid filter lag
+                    List<double> filterBufferList = new List<double>();
+                    // Initialize the filter buffer
+                    for (int i = 0; i < SettingsPageControl.FilterWidth; i++)
+                    {
+                        if (resultList.Count > 0)
+                            filterBufferList.Add(resultList[0]);
+                        else
+                            filterBufferList.Add(0);
+                    }
+                    List<double> tempResultList = new List<double>();
+                    foreach (double actualResult in resultList)
+                    {
+                        filterBufferList.RemoveAt(0);
+                        filterBufferList.Add(actualResult);
+                        double sum = 0;
+                        foreach (double filterBufferEntry in filterBufferList)
+                        {
+                            sum += filterBufferEntry;
+                        }
+                        tempResultList.Add(sum / filterBufferList.Count);
+                    }
+                    // Now filter backwards
+                    tempResultList.Reverse();
+                    filterBufferList.Clear();
+                    resultList.Clear();
+                    for (int i = 0; i < SettingsPageControl.FilterWidth; i++)
+                    {
+                        filterBufferList.Add(tempResultList[0]);
+                    }
+                    foreach (double actualResult in tempResultList)
+                    {
+                        filterBufferList.RemoveAt(0);
+                        filterBufferList.Add(actualResult);
+                        double sum = 0;
+                        foreach (double filterBufferEntry in filterBufferList)
+                        {
+                            sum += filterBufferEntry;
+                        }
+                        resultList.Add(sum / filterBufferList.Count);
+                    }
+                    resultList.Reverse();
+
+                    // Get max and min values of the filtered results
+                    double minResult, maxResult;
+                    GetMaxMinSegmentValue(resultList, out minResult, out maxResult);
                     
-                    //double maxSpeed = 0; // m/s 
-                    //double minSpeed = 1000;
-                    //double distance;
-                    //double oldDistance = 0;
-                    //DateTime oldDt = distanceMetersTrack.GetTimeAtDistanceMeters(oldDistance);
-                    //double segmentDistance = distanceMetersTrack.Max / SettingsPageControl.SegmentsCount;
-                    //segmentDistance = Math.Max(segmentDistance, SettingsPageControl.MinSegmentLength);
-                    //List<double> actSpeedList = new List<double>();
-                    //while (oldDistance < distanceMetersTrack.Max)
-                    //{
-                    //    distance = oldDistance + segmentDistance;
-                    //    if (distance > distanceMetersTrack.Max)
-                    //    {
-                    //        distance = distanceMetersTrack.Max;
-                    //    }
-                    //    DateTime dt = distanceMetersTrack.GetTimeAtDistanceMeters(distance);
-                    //    if (!dt.Equals(oldDt))
-                    //    {
-                    //        double actualResult = (distance - oldDistance) / dt.Subtract(oldDt).TotalSeconds;
-                    //        actSpeedList.Add(actualResult);
-
-                    //        maxSpeed = Math.Max(maxSpeed, actualResult);
-                    //        minSpeed = Math.Min(minSpeed, actualResult);
-                    //    }
-
-                    //    oldDistance = distance;
-                    //    oldDt = dt;
-                    //}
-                    //minSpeed = Math.Max(minSpeed, SettingsPageControl.MinSpeed);
-
                     // Create coloured overlays and add them to the map
                     int oldGPSRouteIndex = 0;
                     double distance = 0;
@@ -316,6 +333,21 @@ namespace RouteColourCode
 
                     oldDistance = distance;
                     oldDt = dt;
+                }
+            }
+        }
+
+        void GetMaxMinSegmentValue(IList<double> resultList, out double minResult, out double maxResult)
+        {
+            maxResult = 0; // m/s 
+            minResult = 1000;
+            foreach (double value in resultList)
+            {
+                maxResult = Math.Max(maxResult, value);
+                minResult = Math.Min(minResult, value);
+                if (SettingsPageControl.TrackChoice.CompareTo("Speed") == 0)
+                {
+                    minResult = Math.Max(minResult, SettingsPageControl.MinSpeed);
                 }
             }
         }
